@@ -1,5 +1,5 @@
 SOBJ=$(PACKSODIR)/ldap4pl.$(SOEXT)
-LIBS=-lldap
+LIBS=-lldap -llber
 
 ifeq "$(DEBUG)" "1"
 	CFLAGS += -DO_DEBUG
@@ -13,7 +13,7 @@ all:	$(SOBJ)
 
 $(SOBJ): c/ldap4pl.o
 	mkdir -p $(PACKSODIR)
-	$(LD) $(LDSOFLAGS) $(SWISOLIB) -o $@ $< $(LIBS)
+	$(CC) -shared $(LDSOFLAGS) -o $@ $< $(SWISOLIB) $(LIBS)
 
 c/ldap4pl.o:
 	$(CC) $(CFLAGS) -c -o c/ldap4pl.o c/ldap4pl.c

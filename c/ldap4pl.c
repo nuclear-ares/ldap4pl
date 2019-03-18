@@ -479,7 +479,7 @@ int build_BerValue(term_t berval_t, BerValue** berval) {
             }
 
             char* bv_val;
-            if (!PL_get_atom_chars(bv_val_t, &bv_val)) {
+            if (!PL_get_chars(bv_val_t,  &bv_val, CVT_ATOM | REP_UTF8)) {
                 PL_type_error("atom", bv_val_t);
                 goto error;
             }
@@ -548,7 +548,7 @@ int build_ldctl_value(term_t ldctl_value_t, LDAPControl* ctrl) {
             }
 
             char* bv_val;
-            if (!PL_get_atom_chars(bv_val_t, &bv_val)) {
+            if (!PL_get_chars(bv_val_t,  &bv_val, CVT_ATOM | REP_UTF8)) {
                 return PL_type_error("atom", bv_val_t);
             }
             ctrl->ldctl_value.bv_val = bv_val;
@@ -603,7 +603,7 @@ int build_LDAPControl(term_t ctrl_t, LDAPControl** ctrl) {
             }
 
             char* ldctl_oid;
-            if (!PL_get_atom_chars(ldctl_oid_t, &ldctl_oid)) {
+            if (!PL_get_chars(ldctl_oid_t,  &ldctl_oid, CVT_ATOM | REP_UTF8)) {
                 PL_type_error("atom", ldctl_oid_t);
                 goto error;
             }
@@ -752,7 +752,7 @@ int build_timeval(term_t timeval_t, TimeVal** timeval) {
             }
 
             time_t tv_sec;
-            if (!PL_get_long(tv_sec_t, &tv_sec)) {
+            if (!PL_get_int64(tv_sec_t, &tv_sec)) {
                 PL_type_error("number", tv_sec_t);
                 goto error;
             }
@@ -764,9 +764,9 @@ int build_timeval(term_t timeval_t, TimeVal** timeval) {
                 goto error;
             }
 
-            suseconds_t tv_usec;
+            useconds_t tv_usec;
 #ifdef __linux__
-            if (!PL_get_long(tv_usec_t, &tv_usec)) {
+            if (!PL_get_int64(tv_usec_t, &tv_usec)) {
 #else
             if (!PL_get_integer(tv_usec_t, &tv_usec)) {
 #endif
@@ -804,7 +804,7 @@ int build_chars_array(term_t array_t, char*** array) {
     term_t head = PL_new_term_ref();
     int i = 0;
     while (PL_get_list(tail, head, tail)) {
-        if (!PL_get_atom_chars(head, &_array[i++])) {
+        if (!PL_get_chars(head,  &_array[i++], CVT_ATOM | REP_UTF8)) {
             free(_array);
             PL_fail;
         }
@@ -824,7 +824,7 @@ int build_chars_t_array(char** array, term_t array_t) {
 
     for (char** i = array; *i; ++i) {
         if (!PL_unify_list(l, a, l) ||
-            !PL_unify_atom_chars(a, *i))
+            !PL_unify_term(a, PL_UTF8_CHARS, *i))
             PL_fail;
     }
 
@@ -869,7 +869,7 @@ int build_query_conditions(term_t query_t, char** base, int* scope, char** filte
                 PL_type_error("compound", arg_t);
                 goto error;
             }
-            if (!PL_get_atom_chars(base_t, base)) {
+            if (!PL_get_chars(base_t, base, CVT_ATOM | REP_UTF8)) {
                 PL_type_error("atom", base_t);
                 goto error;
             }
@@ -894,7 +894,7 @@ int build_query_conditions(term_t query_t, char** base, int* scope, char** filte
                 PL_type_error("compound", arg_t);
                 goto error;
             }
-            if (!PL_get_atom_chars(filter_t, filter)) {
+            if (!PL_get_chars(filter_t,  filter, CVT_ATOM | REP_UTF8)) {
                 PL_type_error("atom", filter_t);
                 goto error;
             }
@@ -1031,7 +1031,7 @@ int build_mod_values(term_t mod_values_t, char*** array) {
     term_t head = PL_new_term_ref();
     int i = 0;
     while (PL_get_list(tail, head, tail)) {
-        if (!PL_get_atom_chars(head, &_array[i++])) {
+        if (!PL_get_chars(head,  &_array[i++], CVT_ATOM | REP_UTF8)) {
             free(_array);
             PL_fail;
         }
@@ -1106,7 +1106,7 @@ int build_LDAPMod(term_t ldapmod_t, LDAPMod** ldapmod) {
             }
 
             char* mod_type;
-            if (!PL_get_atom_chars(mod_type_t, &mod_type)) {
+            if (!PL_get_chars(mod_type_t,  &mod_type, CVT_ATOM | REP_UTF8)) {
                 PL_type_error("atom", mod_type_t);
                 goto error;
             }
@@ -1281,11 +1281,11 @@ int ldap4pl_bind0(term_t ldap_t, term_t who_t, term_t cred_t, term_t method_t, t
     }
 
     char* who;
-    if (!PL_get_atom_chars(who_t, &who)) {
+    if (!PL_get_chars(who_t,  &who, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", who_t);
     }
     char* cred;
-    if (!PL_get_atom_chars(cred_t, &cred)) {
+    if (!PL_get_chars(cred_t,  &cred, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", cred_t);
     }
 
@@ -1305,11 +1305,11 @@ int ldap4pl_simple_bind0(term_t ldap_t, term_t who_t, term_t passwd_t, term_t ms
     }
 
     char* who;
-    if (!PL_get_atom_chars(who_t, &who)) {
+    if (!PL_get_chars(who_t,  &who, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", who_t);
     }
     char* passwd;
-    if (!PL_get_atom_chars(passwd_t, &passwd)) {
+    if (!PL_get_chars(passwd_t,  &passwd, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", passwd_t);
     }
 
@@ -1335,11 +1335,11 @@ int ldap4pl_sasl_bind0(term_t ldap_t, term_t dn_t, term_t mechanism_t,
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
     char* mechanism;
-    if (!PL_get_atom_chars(mechanism_t, &mechanism)) {
+    if (!PL_get_chars(mechanism_t,  &mechanism, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", mechanism_t);
     }
 
@@ -1396,7 +1396,7 @@ int ldap4pl_set_option0(LDAP* ldap, int option, term_t invalue_t) {
     case LDAP_OPT_DIAGNOSTIC_MESSAGE:
     case LDAP_OPT_MATCHED_DN: {
         char* invalue;
-        if (PL_get_atom_chars(invalue_t, &invalue)) {
+        if (PL_get_chars(invalue_t,  &invalue, CVT_ATOM | REP_UTF8)) {
             return !(ld_errno = ldap_set_option(ldap, option, invalue));
         }
         break;
@@ -1461,7 +1461,7 @@ int ldap4pl_get_option0(LDAP* ldap, int option, term_t outvalue_t) {
     case LDAP_OPT_MATCHED_DN: {
         char* outvalue;
         if (!(ld_errno = ldap_get_option(ldap, option, &outvalue))) {
-            int result = PL_unify_atom_chars(outvalue_t, outvalue);
+            int result = PL_unify_term(outvalue_t, PL_UTF8_CHARS, outvalue);
             ldap_memfree(outvalue);
             return result;
         }
@@ -1667,12 +1667,12 @@ int ldap4pl_compare_ext0(term_t ldap_t, term_t dn_t, term_t attribute_t, term_t 
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
     char* attribute;
-    if (!PL_get_atom_chars(attribute_t, &attribute)) {
+    if (!PL_get_chars(attribute_t,  &attribute, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", attribute_t);
     }
 
@@ -1723,17 +1723,17 @@ int ldap4pl_compare0(term_t ldap_t, term_t dn_t,
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
     char* attribute;
-    if (!PL_get_atom_chars(attribute_t, &attribute)) {
+    if (!PL_get_chars(attribute_t,  &attribute, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", attribute_t);
     }
 
     char* value;
-    if (!PL_get_atom_chars(value_t, &value)) {
+    if (!PL_get_chars(value_t,  &value, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", value_t);
     }
 
@@ -1757,7 +1757,7 @@ int ldap4pl_update_ext0(term_t ldap_t, term_t dn_t, term_t attrs_t,
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
@@ -1815,12 +1815,12 @@ int ldap4pl_modrdn0(term_t ldap_t, term_t dn_t, term_t newrdn_t, term_t msgid_t,
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
     char* newrdn;
-    if (!PL_get_atom_chars(newrdn_t, &newrdn)) {
+    if (!PL_get_chars(newrdn_t,  &newrdn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", newrdn_t);
     }
 
@@ -1843,12 +1843,12 @@ int ldap4pl_modrdn20(term_t ldap_t, term_t dn_t, term_t newrdn_t, term_t deleteo
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
     char* newrdn;
-    if (!PL_get_atom_chars(newrdn_t, &newrdn)) {
+    if (!PL_get_chars(newrdn_t,  &newrdn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", newrdn_t);
     }
 
@@ -1879,17 +1879,17 @@ int ldap4pl_rename0(term_t ldap_t, term_t dn_t, term_t newrdn_t,
     }
 
     char* dn;
-    if (!PL_get_atom_chars(dn_t, &dn)) {
+    if (!PL_get_chars(dn_t,  &dn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", dn_t);
     }
 
     char* newrdn;
-    if (!PL_get_atom_chars(newrdn_t, &newrdn)) {
+    if (!PL_get_chars(newrdn_t,  &newrdn, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", newrdn_t);
     }
 
     char* newsuperior;
-    if (!PL_get_atom_chars(newsuperior_t, &newsuperior)) {
+    if (!PL_get_chars(newsuperior_t,  &newsuperior, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", newsuperior_t);
     }
 
@@ -1942,7 +1942,7 @@ int ldap4pl_extended_operation0(term_t ldap_t, term_t requestoid_t, term_t reque
     }
 
     char* requestoid;
-    if (!PL_get_atom_chars(requestoid_t, &requestoid)) {
+    if (!PL_get_chars(requestoid_t,  &requestoid, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", requestoid_t);
     }
 
@@ -1980,7 +1980,7 @@ int ldap4pl_extended_operation0(term_t ldap_t, term_t requestoid_t, term_t reque
     if (!synchronous) {
         return result != 1 && PL_unify_integer(msgid_t, msgid);
     } else {
-        int final_result = result && PL_unify_atom_chars(retoid_t, retoid) &&
+        int final_result = result && PL_unify_term(retoid_t, PL_UTF8_CHARS, retoid) &&
             build_BerValue_t(retdata, retdata_t);
         if (result) {
             ldap_memfree(retoid);
@@ -1996,7 +1996,7 @@ static foreign_t ldap4pl_initialize(term_t ldap_t, term_t uri_t) {
     }
 
     char* uri;
-    if (!PL_get_atom_chars(uri_t, &uri)) {
+    if (!PL_get_chars(uri_t,  &uri, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", uri_t);
     }
 
@@ -2324,7 +2324,7 @@ static foreign_t ldap4pl_first_attribute(term_t ldap_t, term_t entry_t, term_t a
         PL_fail;
     }
 
-    int result = PL_unify_atom_chars(attribute_t, attribute) & PL_unify_pointer(ber_t, ber);
+    int result = PL_unify_term(attribute_t, PL_UTF8_CHARS, attribute) & PL_unify_pointer(ber_t, ber);
     ldap_memfree(attribute);
 
     return result;
@@ -2355,7 +2355,7 @@ static foreign_t ldap4pl_next_attribute(term_t ldap_t, term_t entry_t, term_t at
         PL_fail;
     }
 
-    int result = PL_unify_atom_chars(attribute_t, attribute);
+    int result = PL_unify_term(attribute_t, PL_UTF8_CHARS, attribute);
     ldap_memfree(attribute);
 
     return result;
@@ -2393,7 +2393,7 @@ static foreign_t ldap4pl_get_values(term_t ldap_t, term_t entry_t, term_t attrib
     }
 
     char* attribute;
-    if (!PL_get_atom_chars(attribute_t, (char**) &attribute)) {
+    if (!PL_get_chars(attribute_t,  (char**) &attribute, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("pointer", attribute_t);
     }
 
@@ -2432,7 +2432,7 @@ static foreign_t ldap4pl_get_dn(term_t ldap_t, term_t entry_t, term_t dn_t) {
         PL_fail;
     }
 
-    int result = PL_unify_atom_chars(dn_t, dn);
+    int result = PL_unify_term(dn_t, PL_UTF8_CHARS, dn);
     ldap_memfree(dn);
     return result;
 }
@@ -2486,13 +2486,13 @@ static foreign_t ldap4pl_parse_result(term_t ldap_t, term_t res_t, term_t errcod
     }
 
     if (matcheddn) {
-        if (!PL_unify_atom_chars(matcheddn_t, matcheddn)) {
+        if (!PL_unify_term(matcheddn_t, PL_UTF8_CHARS, matcheddn)) {
             goto error;
         }
     }
 
     if (errmsg) {
-        if (!PL_unify_atom_chars(errmsg_t, errmsg)) {
+        if (!PL_unify_term(errmsg_t, PL_UTF8_CHARS, errmsg)) {
             goto error;
         }
     }
@@ -2543,7 +2543,7 @@ static foreign_t ldap4pl_err2string(term_t errcode_t, term_t errstring_t) {
         PL_fail;
     }
 
-    return PL_unify_atom_chars(errstring_t, errstring);
+    return PL_unify_term(errstring_t, PL_UTF8_CHARS, errstring);
 }
 
 static foreign_t ldap4pl_compare_ext(term_t ldap_t, term_t dn_t, term_t attribute_t, term_t berval_t,
@@ -2672,7 +2672,7 @@ static foreign_t ldap4pl_extended_operation_s(term_t ldap_t, term_t requestoid_t
 
 static foreign_t ldap4pl_is_ldap_url(term_t url_t) {
     char* url;
-    if (!PL_get_atom_chars(url_t, &url)) {
+    if (!PL_get_chars(url_t,  &url, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", url_t);
     }
 
@@ -2685,7 +2685,7 @@ static foreign_t ldap4pl_url_parse(term_t url_t, term_t lud_t) {
     }
 
     char* url;
-    if (!PL_get_atom_chars(url_t, &url)) {
+    if (!PL_get_chars(url_t,  &url, CVT_ATOM | REP_UTF8)) {
         return PL_type_error("atom", url_t);
     }
 
